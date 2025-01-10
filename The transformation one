@@ -1,0 +1,70 @@
+pip install pyproj
+
+import tkinter as tk
+from tkinter import *
+from pyproj import Proj, transform
+
+# Funksjon for å konvertere UTM til latitude og longitude
+def convert_utm_to_latlon():
+    try:
+        utm_x = float(entry_utm_x.get())
+        utm_y = float(entry_utm_y.get())
+        zone_number = int(entry_zone_number.get())
+        northern = var_northern.get()
+
+        # Definerer UTM projeksjonen basert på sone og hemisfære
+        utm_projection = Proj(proj='utm', zone=zone_number, ellps='WGS84', south=not northern)
+
+        # Definerer lat/lon projeksjonen
+        latlon_projection = Proj(proj='latlong', datum='WGS84')
+
+        # Konverterer UTM til lat/lon
+        lon, lat = transform(utm_projection, latlon_projection, utm_x, utm_y)
+
+        # Viser resultatet i grensesnittet
+        entry_latitude.delete(0, END)
+        entry_latitude.insert(END, str(lat))
+        entry_longitude.delete(0, END)
+        entry_longitude.insert(END, str(lon))
+
+    except Exception as e:
+        entry_latitude.delete(0, END)
+        entry_latitude.insert(END, "Error")
+        entry_longitude.delete(0, END)
+        entry_longitude.insert(END, "Error")
+
+# Opprette hovedvinduet
+root = tk.Tk()
+root.title("UTM til Latitude/Longitude Kalkulator")
+
+# Opprettelse av inputfelt for UTM-koordinater og sone
+Label(root, text="UTM X:").grid(row=0, column=0)
+entry_utm_x = Entry(root)
+entry_utm_x.grid(row=0, column=1)
+
+Label(root, text="UTM Y:").grid(row=1, column=0)
+entry_utm_y = Entry(root)
+entry_utm_y.grid(row=1, column=1)
+
+Label(root, text="Sone nummer:").grid(row=2, column=0)
+entry_zone_number = Entry(root)
+entry_zone_number.grid(row=2, column=1)
+
+Label(root, text="Nordlig:").grid(row=3, column=0)
+var_northern = BooleanVar(value=True)
+Checkbutton(root, variable=var_northern).grid(row=3, column=1)
+
+# Knapp for konvertering
+Button(root, text="Konverter", command=convert_utm_to_latlon).grid(row=4, column=0, columnspan=2)
+
+# Opprettelse av outputfelt for latitude og longitude
+Label(root, text="Latitude:").grid(row=5, column=0)
+entry_latitude = Entry(root)
+entry_latitude.grid(row=5, column=1)
+
+Label(root, text="Longitude:").grid(row=6, column=0)
+entry_longitude = Entry(root)
+entry_longitude.grid(row=6, column=1)
+
+# Kjøre hovedløkken
+root.mainloop()
